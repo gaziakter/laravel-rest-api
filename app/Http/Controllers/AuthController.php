@@ -28,6 +28,18 @@ class AuthController extends Controller
     //Login user
     public function login(Request $request)
     {
-        return "Login endpoint";
+        $credentials = $request->validate([
+            'email' => 'required|string|email',
+            'password' => 'required|string',
+        ]); // Validate input data
+
+        if (!auth()->attempt($credentials)) {
+            return response()->json(['message' => 'Invalid credentials'], 401);
+        } // Attempt to authenticate the user
+
+        $user = auth()->user();
+        $token = $user->createToken('auth_token')->plainTextToken; // Create token for the authenticated user
+
+        return response()->json(['message' => 'Login successful', 'access_token' => $token, 'token_type' => 'Bearer'], 200);
     }
 }
